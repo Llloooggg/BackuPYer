@@ -3,11 +3,14 @@
 from datetime import datetime
 from subprocess import call
 from shutil import rmtree
-from os import scandir, makedirs, remove, rename
+from os import path, makedirs, scandir, remove, rename
 
 path_to_backups = "/mnt/bank/backups/"
 
 dateFormat = "%H-%M-%S--%d-%m-%Y"
+
+if not path.exists(f"{path_to_backups}"):
+    makedirs(f"{path_to_backups}")
 
 all_objs = []
 with scandir(path_to_backups) as dir_objs:
