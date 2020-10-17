@@ -59,7 +59,7 @@ new = datetime.now().strftime(dateFormat)
 
 
 sync = call(
-    "rsync -aAXv / --exclude={'/dev/*','/proc/*','/sys/*','/tmp/*','/run/*','/mnt/*','/media/*','/lost+found'} --delete "
+    "rsync -aAXсv / --exclude={'/dev/*','/proc/*','/sys/*','/tmp/*','/run/*','/mnt/*','/media/*','/lost+found'} --delete "
     + {path_to_backups}
     + {old_backup},
     shell=True,
