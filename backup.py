@@ -7,12 +7,14 @@ from shutil import rmtree
 from sys import argv
 from os import path, makedirs, scandir, remove, rename
 
+
 parser = ArgumentParser()
 required = parser.add_argument_group("required arguments")
 required.add_argument("-hn", help="machine hostname", required=True)
 required.add_argument("-p", help="path to backup folder", required=True)
 optional = parser.add_argument_group("optional arguments")
 optional.add_argument("-n", help="number of backups", type=int, default=2)
+optional.add_argument("-sp", help="ssh port", type=int, default=22)
 
 args = parser.parse_args(argv[1:])
 
@@ -26,6 +28,7 @@ if args.n > 0:
 else:
     print("Error - wrong number of backups!")
     exit()
+ssh_port = parser.sp
 
 dateFormat = "%H-%M-%S--%d-%m-%Y"
 
@@ -72,7 +75,6 @@ else:
     old_backup = date_dirs[-1]
 print(old_backup)
 
-
 safe_list.extend(date_dirs[:backup_num])
 print(safe_list)
 
@@ -85,12 +87,10 @@ for obj in all_objs:
 
 new = datetime.now().strftime(dateFormat)
 
-
 write_log("SUCCESS", f"Sync started at {new}\n")
 
-
 sync = call(
-    f"rsync -aAXcv / --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found'}} {path_to_backups}{old_backup} --delete",
+    f"rsync -aAXcv / --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found'}} {path_to_backups}{old_backup} --delete -e 'ssh -p {ssh_port}'",
     shell=True,
 )
 
@@ -103,6 +103,5 @@ if sync == 0:
 else:
     header = "ERROR"
     message = f"Sync at {new} to {old_backup} crashed\n"
-
 
 write_log(header, message)
