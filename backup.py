@@ -2,15 +2,42 @@
 
 from datetime import datetime
 from subprocess import call
+from argparse import ArgumentParser
 from shutil import rmtree
+from sys import argv
 from os import path, makedirs, scandir, remove, rename
 
-path_to_backups = "/mnt/bank/backups/"
+parser = ArgumentParser()
+required = parser.add_argument_group("required arguments")
+required.add_argument("-hn", help="machine hostname", required=True)
+required.add_argument("-p", help="path to backup folder", required=True)
+optional = parser.add_argument_group("optional arguments")
+optional.add_argument("-n", help="number of backups", type=int, default=2)
+
+args = parser.parse_args(argv[1:])
+
+hostname = args.hn
+if args.p[-1] == "/":
+    path_to_backups = args.p + hostname + "/"
+else:
+    path_to_backups = args.p + "/" + hostname + "/"
+if args.n > 0:
+    backup_num = args.n
+else:
+    print("Error - wrong number of backups!")
+    exit()
 
 dateFormat = "%H-%M-%S--%d-%m-%Y"
 
-if not path.exists(f"{path_to_backups}"):
-    makedirs(f"{path_to_backups}")
+
+def write_log(header, message):
+    with open(path_to_backups + "sync.log", "a") as f:
+        f.write(datetime.now().strftime("[%X] ") + header + "\n")
+        f.write(message + "\n")
+
+
+if not path.exists(path_to_backups):
+    makedirs(path_to_backups)
 
 all_objs = []
 with scandir(path_to_backups) as dir_objs:
@@ -30,22 +57,24 @@ print()
 date_dirs.sort(reverse=True)
 safe_list = []
 safe_list.append("sync.log")
-if len(date_dirs) > 1:
-    cur_backup = date_dirs[0]
-    old_backup = date_dirs[1]
-    safe_list.append(cur_backup)
-elif len(date_dirs) == 1:
-    if date_dirs[0] != "00-00-00--01-01-0001":
+
+print(date_dirs)
+print(len(date_dirs))
+if len(date_dirs) < backup_num:
+    if not date_dirs or date_dirs[-1] != "00-00-00--01-01-0001":
         makedirs(path_to_backups + "00-00-00--01-01-0001")
-        cur_backup = date_dirs[0]
-        safe_list.append(cur_backup)
+        safe_list.append("00-00-00--01-01-0001")
     old_backup = "00-00-00--01-01-0001"
+elif date_dirs[-1] == "00-00-00--01-01-0001":
+    old_backup = "00-00-00--01-01-0001"
+    date_dirs.pop(-2)
 else:
-    makedirs(path_to_backups + "00-00-00--01-01-0001")
-    old_backup = "00-00-00--01-01-0001"
+    old_backup = date_dirs[-1]
+print(old_backup)
 
-safe_list.append(old_backup)
 
+safe_list.extend(date_dirs[:backup_num])
+print(safe_list)
 
 for obj in all_objs:
     if obj.name not in safe_list:
@@ -54,8 +83,10 @@ for obj in all_objs:
         else:
             remove(path_to_backups + obj.name)
 
-
 new = datetime.now().strftime(dateFormat)
+
+
+write_log("SUCCESS", f"Sync started at {new}\n")
 
 
 sync = call(
@@ -65,15 +96,13 @@ sync = call(
 
 if sync == 0:
     header = "SUCCESS"
-    message = f"Sync at {new} to {old_backup} successful completed"
+    message = f"Sync at {new} to {old_backup} successful completed\n"
 
     rename(path_to_backups + old_backup, path_to_backups + new)
 
 else:
     header = "ERROR"
-    message = f"Sync at {new} to {old_backup} crashed"
+    message = f"Sync at {new} to {old_backup} crashed\n"
 
 
-with open(f"{path_to_backups}sync.log", "a") as f:
-    f.write(datetime.now().strftime("[%X] ") + header + "\n")
-    f.write(message + "\n")
+write_log(header, message)
