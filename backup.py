@@ -14,7 +14,7 @@ required.add_argument("-hn", help="machine hostname", required=True)
 required.add_argument("-p", help="path to backup folder", required=True)
 optional = parser.add_argument_group("optional arguments")
 optional.add_argument("-n", help="number of backups", type=int, default=2)
-optional.add_argument("-sp", help="ssh port", type=int, default=22)
+# optional.add_argument("-s", help="ssh port")
 
 args = parser.parse_args(argv[1:])
 
@@ -28,7 +28,10 @@ if args.n > 0:
 else:
     print("Error - wrong number of backups!")
     exit()
-ssh_port = parser.sp
+# if args.s is not None:
+#     ssh_port = f" -e 'ssh -p {args.s}'"
+# else:
+#     ssh_port = None
 
 dateFormat = "%H-%M-%S--%d-%m-%Y"
 
@@ -56,27 +59,19 @@ for obj in all_objs:
         except Exception:
             pass
 
-print()
 date_dirs.sort(reverse=True)
 safe_list = []
 safe_list.append("sync.log")
 
-print(date_dirs)
-print(len(date_dirs))
 if len(date_dirs) < backup_num:
     if not date_dirs or date_dirs[-1] != "00-00-00--01-01-0001":
         makedirs(path_to_backups + "00-00-00--01-01-0001")
         safe_list.append("00-00-00--01-01-0001")
     old_backup = "00-00-00--01-01-0001"
-elif date_dirs[-1] == "00-00-00--01-01-0001":
-    old_backup = "00-00-00--01-01-0001"
-    date_dirs.pop(-2)
 else:
-    old_backup = date_dirs[-1]
-print(old_backup)
+    old_backup = date_dirs[backup_num - 1]
 
 safe_list.extend(date_dirs[:backup_num])
-print(safe_list)
 
 for obj in all_objs:
     if obj.name not in safe_list:
@@ -90,7 +85,7 @@ new = datetime.now().strftime(dateFormat)
 write_log("SUCCESS", f"Sync started at {new}\n")
 
 sync = call(
-    f"rsync -aAXcv / --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found'}} {path_to_backups}{old_backup} --delete -e 'ssh -p {ssh_port}'",
+    f"rsync -aAXcv / --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found'}} {path_to_backups}{old_backup} --delete",
     shell=True,
 )
 
