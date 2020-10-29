@@ -85,7 +85,7 @@ new = datetime.now().strftime(dateFormat)
 write_log("SUCCESS", f"Sync started at {new}\n")
 
 sync = call(
-    f"rsync -avAXHP --delete --delete-excluded --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","/var/lib/pacman/sync/*","/var/cache/apt/archives/*","/var/cache/*","/var/tmp/*","/boot/lost+found","/home/lost+found","/home/*/.thumbnails/*","/home/*/.cache/google-chrome/*","/home/*/.local/share/Trash/*","/home/*/.gvfs/*", "/home/share/*"} /* {path_to_backups}{old_backup}",
+    f"rsync -avAXHP --delete --delete-excluded --exclude={'/dev/*','/proc/*','/sys/*','/tmp/*','/run/*','/mnt/*','/media/*','/lost+found','/var/lib/pacman/sync/*','/var/cache/apt/archives/*','/var/cache/*','/var/tmp/*','/boot/lost+found','/home/lost+found','/home/*/.thumbnails/*','/home/*/.cache/google-chrome/*','/home/*/.local/share/Trash/*','/home/*/.gvfs/*','/home/share/*'} /* {path_to_backups}{old_backup}",
     shell=True,
 )
 
