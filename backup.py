@@ -85,7 +85,7 @@ new = datetime.now().strftime(dateFormat)
 write_log("SUCCESS", f"Sync started at {new}\n")
 
 sync = call(
-    f"rsync -avAXHP --delete --delete-excluded --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found' --exclude='/var/lib/pacman/sync/*' --exclude='/var/cache/apt/archives/*' --exclude='/var/cache/*' --exclude='/var/tmp/*' --exclude='/boot/lost+found' --exclude='/home/lost+found' --exclude='/home/*/.thumbnails/*' --exclude='/home/*/.cache/google-chrome/*' --exclude='/home/*/.local/share/Trash/*' --exclude='/home/*/.gvfs/*' --exclude='/home/share/*' /* {path_to_backups}{old_backup}",
+    f"rsync -avcAXHP --delete --delete-excluded --exclude='/dev/*' --exclude='/proc/*' --exclude='/sys/*' --exclude='/tmp/*' --exclude='/run/*' --exclude='/mnt/*' --exclude='/media/*' --exclude='/lost+found' --exclude='/var/lib/pacman/sync/*' --exclude='/var/cache/apt/archives/*' --exclude='/var/cache/*' --exclude='/var/tmp/*' --exclude='/boot/lost+found' --exclude='/home/lost+found' --exclude='/home/*/.thumbnails/*' --exclude='/home/*/.cache/google-chrome/*' --exclude='/home/*/.local/share/Trash/*' --exclude='/home/*/.gvfs/*' --exclude='/home/share/*' /* {path_to_backups}{old_backup}",
     shell=True,
 )
 
